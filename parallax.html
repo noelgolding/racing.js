@@ -17,10 +17,15 @@ class Player extends GameObject{
   }
 
   draw(ctx){
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.width, this.height);
     this.strokeStyle = 'green';
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.moveTo(this.x + this.width/2, this.y + this.height * 2);
+    ctx.lineTo(this.x + this.width/2, 0);
+    ctx.stroke();
+    ctx.fillRect(this.x, this.y, this.width, this.height);
     ctx.strokeRect(this.x, this.y, this.width, this.height);
+    
   }
 }
 
@@ -31,9 +36,9 @@ class ParallaxScroller extends SimpleGame{
     this.camera = new Camera(this.player, this.width, this.height);
 
     this.background = new Background(this.camera);
-    this.background.addLayer(new ParallaxBackgroundLayer(this.assetMgr.getImage('assets/images/background/sky.png'), .05));
+    this.background.addLayer(new ParallaxBackgroundLayer(this.assetMgr.getImage('assets/images/background/sky.png'), .02));
     this.background.addLayer(new ParallaxBackgroundLayer(this.assetMgr.getImage('assets/images/background/hills.png'), .15));
-    this.background.addLayer(new ParallaxBackgroundLayer(this.assetMgr.getImage('assets/images/background/trees.png'), .95));
+    this.background.addLayer(new ParallaxBackgroundLayer(this.assetMgr.getImage('assets/images/background/trees.png'), .9));
 
     this.box = new Player(950, 400, 50, 80, '#ff0000');
 
