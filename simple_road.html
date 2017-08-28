@@ -1,0 +1,54 @@
+<link rel="stylesheet" href="css/SimpleGame.css" type="text/css"/>
+<canvas width="1024" height="768" id="gameCanvas" class="simple-game"></canvas>
+<script src="scripts/SimpleGame.js"></script>
+<script>
+
+class RacingGame extends SimpleGame{
+  init(){
+    this.COLORS = {
+      SKY:  '#72D7EE',
+      TREE: '#005108',
+      FOG:  '#005108',
+      LIGHT:  { road: '#6B6B6B', grass: '#10AA10', rumble: '#555555', lane: '#CCCCCC'  },
+      DARK:   { road: '#696969', grass: '#009A00', rumble: '#BBBBBB'                   },
+      START:  { road: 'white',   grass: 'white',   rumble: 'white'                     },
+      FINISH: { road: 'black',   grass: 'black',   rumble: 'black'                     }
+    };
+
+    this.segmentLength = 200; // meters?
+    this.rumbleLength = 3; // number of segments per rumble strip
+    this.drawDistance = this.segmentLength*this.rumbleLength*10; // number of segments to draw
+
+
+    this.resetRoad();
+  }
+
+  resetRoad() {
+    this.segments = [];
+    for(var n = 0 ; n < this.drawDistance*2 ; n++) { // arbitrary road length
+      this.segments.push({
+         index: n,
+         p1: { world: { z:  n   *this.segmentLength }, camera: {}, screen: {} },
+         p2: { world: { z: (n+1)*this.segmentLength }, camera: {}, screen: {} },
+         color: Math.floor(n/this.rumbleLength)%2 ? this.COLORS.DARK : this.COLORS.LIGHT
+      });
+    }
+    this.trackLength = this.segments.length * this.segmentLength;
+  }
+
+  findSegment(z){
+    return this.segments[Math.floor(z/this.segmentLength) % this.segments.length];
+  }
+
+  draw(ctx) {
+
+  }
+}
+
+var game;
+function main(){
+  game = new RacingGame(document.getElementById('gameCanvas'));
+  game.start();
+}
+window.addEventListener('load', main);
+</script>

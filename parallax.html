@@ -1,0 +1,80 @@
+<link rel="stylesheet" href="css/SimpleGame.css" type="text/css"/>
+<canvas width="1024" height="768" id="gameCanvas" class="simple-game" style="background-color:#323232"></canvas>
+<script src="scripts/SimpleGame.js"></script>
+<script>
+class Player extends GameObject{
+  constructor(x, y, width, height, color){
+    super(x, y);
+    this.speed = 360;
+    this.velocityX = 0;
+    this.width = width;
+    this.height = height;
+    this.color = color;
+  }
+
+  update(dt){
+    this.x += this.velocityX * dt;
+  }
+
+  draw(ctx){
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+    this.strokeStyle = 'green';
+    ctx.strokeRect(this.x, this.y, this.width, this.height);
+  }
+}
+
+class ParallaxScroller extends SimpleGame{
+  init(){
+    this.player = new Player(50, 400, 50, 80, '#f2f2f2');
+
+    this.camera = new Camera(this.player, this.width, this.height);
+
+    this.background = new Background(this.camera);
+    this.background.addLayer(new ParallaxBackgroundLayer(this.assetMgr.getImage('assets/images/background/sky.png'), .05));
+    this.background.addLayer(new ParallaxBackgroundLayer(this.assetMgr.getImage('assets/images/background/hills.png'), .15));
+    this.background.addLayer(new ParallaxBackgroundLayer(this.assetMgr.getImage('assets/images/background/trees.png'), 1));
+
+    this.box = new Player(950, 400, 50, 80, '#ff0000');
+
+  }
+
+  handleInput(){
+    if (this.keyspressed['KeyA'] || this.keyspressed['ArrowLeft'] ) {
+      this.player.velocityX = -this.player.speed;
+    } else if  (this.keyspressed['KeyD'] || this.keyspressed['ArrowRight'] ) {
+      this.player.velocityX = this.player.speed;
+    } else {
+      this.player.velocityX = 0;
+    }
+  }
+
+  update(dt){
+    this.handleInput();
+
+    this.player.update(dt);
+    this.box.update(dt);
+
+    // check for collisions
+    if (this.player.x + this.player.width > this.box.x) {
+      //this.player.x = this.box.x - this.player.width;
+    }
+
+  }
+
+  draw(ctx) {
+    this.camera.draw(ctx);
+    this.background.draw(ctx);
+    this.player.draw(ctx);
+    this.box.draw(ctx);
+  }
+}
+
+var game;
+function main(){
+  game = new ParallaxScroller(document.getElementById('gameCanvas'));
+  game.showFPS = true;
+  game.start();
+}
+window.addEventListener('load', main);
+</script>

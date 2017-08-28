@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="css/SimpleGame.css" />
+
+<canvas width="1024" height="768" id="gameCanvas" class="simple-game"></canvas>
+
+<script src="scripts/common.js"></script>
+<script src="scripts/SimpleGame.js"></script>
+<script src="scripts/RacingGame.js"></script>
+<script src="scripts/outrun.js"></script>
+
+<script>
+var game;
+function main(){
+  game = new OutRun(document.getElementById('gameCanvas'));
+  game.start();
+}
+
+window.addEventListener('load', () => main() );
+</script>
