@@ -33,7 +33,7 @@ class ParallaxScroller extends SimpleGame{
     this.background = new Background(this.camera);
     this.background.addLayer(new ParallaxBackgroundLayer(this.assetMgr.getImage('assets/images/background/sky.png'), .05));
     this.background.addLayer(new ParallaxBackgroundLayer(this.assetMgr.getImage('assets/images/background/hills.png'), .15));
-    this.background.addLayer(new ParallaxBackgroundLayer(this.assetMgr.getImage('assets/images/background/trees.png'), 1));
+    this.background.addLayer(new ParallaxBackgroundLayer(this.assetMgr.getImage('assets/images/background/trees.png'), .95));
 
     this.box = new Player(950, 400, 50, 80, '#ff0000');
 

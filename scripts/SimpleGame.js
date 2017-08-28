@@ -58,15 +58,19 @@ class SimpleSprite extends GameObject {
 }
 
 class BackgroundLayer extends SimpleSprite{
-
   draw(ctx, camera){
     super.draw(ctx);
     let origX = this.x;
-      this.x += this.img.width + 10;
-      super.draw(ctx);
-      this.x = origX;
+    if (camera.getTranslateX() > 0) {
+      // moving to the left
+      this.x = origX - this.img.width;
+    } else {
+      // moving to the right
+      this.x = origX + this.img.width;
+    }
+    super.draw(ctx);
+    this.x = origX;
   }
-
 }
 
 class ParallaxBackgroundLayer extends BackgroundLayer{
@@ -76,21 +80,13 @@ class ParallaxBackgroundLayer extends BackgroundLayer{
   }
 
   getTranslateX(camera){
-    let tx_d = 0;
-    if (-camera.getTranslateX() > this.img.width - camera.width) {
-      // console.log("We need to add an image to the right");
-      tx_d = this.img.width - camera.width - camera.getTranslateX();
-    } else if (-camera.getTranslateX() < 0) {
-      // console.log("We need to add an image to the left");
-      tx_d = -camera.getTranslateX();
-    }
-    let tx = camera.gameObject.x * (1-this.tx);
-    return 1;
+    let tx = (camera.gameObject.x * this.tx) % this.img.width;
+    return tx;
   }
 
   draw(ctx, camera){
     ctx.save();
-    ctx.translate(this.getTranslateX(camera), 0);
+    ctx.translate(-camera.getTranslateX() - this.getTranslateX(camera), 0);
     super.draw(ctx, camera);
     ctx.restore();
   }
