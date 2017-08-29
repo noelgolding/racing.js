@@ -1,5 +1,5 @@
 <link rel="stylesheet" href="css/SimpleGame.css" type="text/css"/>
-<canvas width="1024" height="768" id="gameCanvas" class="simple-game" style="background-color:#323232" tabindex="0"></canvas>
+<canvas width="1095" height="460" id="gameCanvas" class="simple-game" style="background-color:#323232" tabindex="0"></canvas>
 <script src="scripts/SimpleGame.js"></script>
 <script>
 class Player extends GameObject{
@@ -31,8 +31,8 @@ class Player extends GameObject{
 
 class ParallaxScroller extends SimpleGame{
   init(){
-    this.player = new Player(50, 400, 50, 80, '#f2f2f2');
-    this.box = new Player(950, 400, 50, 80, '#ff0000');
+    this.player = new Player(50, 300, 50, 80, '#f2f2f2');
+    this.box = new Player(950, 300, 50, 80, '#ff0000');
 
     this.camera = new Camera(this.player, this.width, this.height);
 
@@ -42,7 +42,7 @@ class ParallaxScroller extends SimpleGame{
     this.background.addLayer(new ParallaxLayer(this.assetMgr.getImage('assets/images/background/trees.png'), .5));
 
     this.foreground = new ParallaxContainer(this.camera);
-    this.foreground.addLayer(new ParallaxLayer(this.assetMgr.getImage('assets/images/background/grass.png'), 0, 0, 100));
+    this.foreground.addLayer(new ParallaxLayer(this.assetMgr.getImage('assets/images/background/grass.png')));
 
   }
 

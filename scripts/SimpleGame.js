@@ -57,6 +57,10 @@ class SimpleSprite extends GameObject {
   }
 }
 
+/**
+ * img width has to be at least as wide as the canvs in order to provide
+ * accurate inifinite scrolling 
+ */
 class ParallaxLayer extends SimpleSprite{
   constructor(img, tx=0, x=0, y=0, velocityX=0){
     super(img, x, y);
@@ -164,8 +168,8 @@ class SimpleGame{
     this.last   = Date.now();
     this.dt     = 0;
     this.gdt    = 0;
-    this.frameCount = 0;
-    this.currentSecond = 0;
+    this.fpsCounter = 0;
+    this.fpsTimer = 0;
     this.framesPerSecond = this.fps;
     this.gameloop();
   }
@@ -194,12 +198,12 @@ class SimpleGame{
       this.update(this.step);
     }
     this.drawInternal();
-    this.currentSecond += Math.min(1000, this.now - this.last);
-    this.frameCount++;
-    if (this.currentSecond >= 1000) {
-      this.framesPerSecond = this.frameCount;
-      this.frameCount = 0;
-      this.currentSecond = 0;
+    this.fpsTimer += Math.min(1000, this.now - this.last);
+    this.fpsCounter++;
+    if (this.fpsTimer >= 1000) {
+      this.framesPerSecond = this.fpsCounter;
+      this.fpsCounter = 0;
+      this.fpsTimer = 0;
     }
     this.last = this.now;
     requestAnimationFrame(() => this.gameloop());
