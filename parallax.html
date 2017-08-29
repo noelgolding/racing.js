@@ -1,5 +1,5 @@
 <link rel="stylesheet" href="css/SimpleGame.css" type="text/css"/>
-<canvas width="1024" height="768" id="gameCanvas" class="simple-game" style="background-color:#323232"></canvas>
+<canvas width="1024" height="768" id="gameCanvas" class="simple-game" style="background-color:#323232" tabindex="0"></canvas>
 <script src="scripts/SimpleGame.js"></script>
 <script>
 class Player extends GameObject{
@@ -25,22 +25,24 @@ class Player extends GameObject{
     ctx.stroke();
     ctx.fillRect(this.x, this.y, this.width, this.height);
     ctx.strokeRect(this.x, this.y, this.width, this.height);
-    
+
   }
 }
 
 class ParallaxScroller extends SimpleGame{
   init(){
     this.player = new Player(50, 400, 50, 80, '#f2f2f2');
+    this.box = new Player(950, 400, 50, 80, '#ff0000');
 
     this.camera = new Camera(this.player, this.width, this.height);
 
-    this.background = new Background(this.camera);
-    this.background.addLayer(new ParallaxBackgroundLayer(this.assetMgr.getImage('assets/images/background/sky.png'), .02));
-    this.background.addLayer(new ParallaxBackgroundLayer(this.assetMgr.getImage('assets/images/background/hills.png'), .15));
-    this.background.addLayer(new ParallaxBackgroundLayer(this.assetMgr.getImage('assets/images/background/trees.png'), .9));
+    this.background = new ParallaxContainer(this.camera);
+    this.background.addLayer(new ParallaxLayer(this.assetMgr.getImage('assets/images/background/sky.png'), .98));
+    this.background.addLayer(new ParallaxLayer(this.assetMgr.getImage('assets/images/background/hills.png'), .85));
+    this.background.addLayer(new ParallaxLayer(this.assetMgr.getImage('assets/images/background/trees.png'), .5));
 
-    this.box = new Player(950, 400, 50, 80, '#ff0000');
+    this.foreground = new ParallaxContainer(this.camera);
+    this.foreground.addLayer(new ParallaxLayer(this.assetMgr.getImage('assets/images/background/grass.png'), 0, 0, 100));
 
   }
 
@@ -57,6 +59,8 @@ class ParallaxScroller extends SimpleGame{
   update(dt){
     this.handleInput();
 
+    // this.background.update(dt);
+
     this.player.update(dt);
     this.box.update(dt);
 
@@ -72,6 +76,7 @@ class ParallaxScroller extends SimpleGame{
     this.background.draw(ctx);
     this.player.draw(ctx);
     this.box.draw(ctx);
+    this.foreground.draw(ctx);
   }
 }
 

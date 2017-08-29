@@ -25,7 +25,7 @@ class Camera{
     this.gameObject = gameObject;
     this.width = width;
     this.height = height;
-    this.margin = 50;
+    this.margin = width/2;//50;
   }
 
   getTranslateX(){
@@ -57,42 +57,38 @@ class SimpleSprite extends GameObject {
   }
 }
 
-class BackgroundLayer extends SimpleSprite{
-  draw(ctx, camera){
-    super.draw(ctx);
-    let origX = this.x;
-    if (camera.getTranslateX() > 0) {
-      // moving to the left
-      this.x = origX - this.img.width;
-    } else {
-      // moving to the right
-      this.x = origX + this.img.width;
-    }
-    super.draw(ctx);
-    this.x = origX;
-  }
-}
-
-class ParallaxBackgroundLayer extends BackgroundLayer{
-  constructor(img, tx, x=0, y=0){
+class ParallaxLayer extends SimpleSprite{
+  constructor(img, tx=0, x=0, y=0){
     super(img, x, y);
     this.tx = tx;
   }
 
   getTranslateX(camera){
-    let tx = (camera.gameObject.x * this.tx) % this.img.width;
+    let tx = (camera.gameObject.x * (1-this.tx)) % this.img.width;
     return tx;
   }
 
   draw(ctx, camera){
     ctx.save();
-    ctx.translate(-camera.getTranslateX() - this.getTranslateX(camera), 0);
-    super.draw(ctx, camera);
+    let tx = this.getTranslateX(camera)
+    ctx.translate(-camera.getTranslateX() -tx, 0);
+    super.draw(ctx);
+    let origX = this.x;
+
+    if (camera.width - this.img.width + (tx%this.img.width) >= 0){
+      this.x = origX + this.img.width;
+    } else {
+      this.x = origX - this.img.width;
+    }
+
+    super.draw(ctx);
+    this.x = origX;
+
     ctx.restore();
   }
 }
 
-class Background {
+class ParallaxContainer {
   constructor(camera){
     this.camera = camera;
     this.layers = [];
@@ -128,6 +124,8 @@ class SimpleGame{
 
     window.addEventListener('resize', (e) => this.scaleCanvas());
     this.scaleCanvas();
+
+    this.canvas.focus();
   }
 
   scaleCanvas(){
