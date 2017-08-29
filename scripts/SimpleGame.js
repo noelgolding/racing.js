@@ -58,9 +58,10 @@ class SimpleSprite extends GameObject {
 }
 
 class ParallaxLayer extends SimpleSprite{
-  constructor(img, tx=0, x=0, y=0){
+  constructor(img, tx=0, x=0, y=0, velocityX=0){
     super(img, x, y);
     this.tx = tx;
+    this.velocityX = velocityX;
   }
 
   getTranslateX(camera){
@@ -68,14 +69,18 @@ class ParallaxLayer extends SimpleSprite{
     return tx;
   }
 
+  update(dt){
+    this.x += this.velocityX * dt;
+  }
+
   draw(ctx, camera){
     ctx.save();
     let tx = this.getTranslateX(camera)
     ctx.translate(-camera.getTranslateX() -tx, 0);
     super.draw(ctx);
-    let origX = this.x;
 
-    if (camera.width - this.img.width + (tx%this.img.width) >= 0){
+    let origX = this.x;
+    if (camera.width - this.img.width + (tx%this.img.width) - this.x >= 0){
       this.x = origX + this.img.width;
     } else {
       this.x = origX - this.img.width;
@@ -96,6 +101,12 @@ class ParallaxContainer {
 
   addLayer(layer){
     this.layers.push(layer);
+  }
+
+  update(dt){
+    this.layers.forEach( l => {
+      l.update(dt);
+    });
   }
 
   draw(ctx){
