@@ -59,7 +59,7 @@ class SimpleSprite extends GameObject {
 
 /**
  * img width has to be at least as wide as the canvs in order to provide
- * accurate inifinite scrolling 
+ * accurate inifinite scrolling
  */
 class ParallaxLayer extends SimpleSprite{
   constructor(img, tx=0, x=0, y=0, velocityX=0){
@@ -75,6 +75,11 @@ class ParallaxLayer extends SimpleSprite{
 
   update(dt){
     this.x += this.velocityX * dt;
+    if (this.x < -this.img.width) {
+      this.x += this.img.width;
+    } else if (this.x > this.img.width) {
+      this.x -= this.img.width;
+    }
   }
 
   draw(ctx, camera){
@@ -84,7 +89,7 @@ class ParallaxLayer extends SimpleSprite{
     super.draw(ctx);
 
     let origX = this.x;
-    if (camera.width - this.img.width + (tx%this.img.width) - this.x >= 0){
+    if (camera.width - this.img.width + (tx%this.img.width) >= this.x){
       this.x = origX + this.img.width;
     } else {
       this.x = origX - this.img.width;
