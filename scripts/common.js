@@ -260,7 +260,7 @@ var Render = {
         Render.polygon(ctx, lanex1 - l1/2, y1, lanex1 + l1/2, y1, lanex2 + l2/2, y2, lanex2 - l2/2, y2, color.lane);
     }
 
-    Render.fog(ctx, 0, y1, width, y2-y1, fog);
+    // Render.fog(ctx, 0, y1, width, y2-y1, fog);
   },
 
   //---------------------------------------------------------------------------

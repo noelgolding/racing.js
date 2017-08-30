@@ -2,6 +2,65 @@
 <canvas width="1024" height="768" id="gameCanvas" class="simple-game"></canvas>
 <script src="scripts/SimpleGame.js"></script>
 <script>
+var Util = {
+    project: function(point, cameraX, cameraY, cameraZ, cameraDepth, canvasWidth, canvasHeight, roadWidthInWorldUnits){
+      point.camera.x     = (point.world.x || 0) - cameraX; // these are world coords
+      point.camera.y     = (point.world.y || 0) - cameraY; // these are world coords
+      point.camera.z     = (point.world.z || 0) - cameraZ; // these are world coords
+      point.screen.scale = cameraDepth/point.camera.z; // this is the scaling factor to convert from world to screen
+      point.screen.x     = Math.round((canvasWidth/2)  + (point.screen.scale * point.camera.x  * canvasWidth/2));
+      point.screen.y     = Math.round((canvasHeight/2) - (point.screen.scale * point.camera.y  * canvasHeight/2));
+      point.screen.w     = Math.round(             (point.screen.scale * roadWidthInWorldUnits   * canvasWidth/2));
+    }
+};
+
+var Render = {
+  fillPolygon: function(ctx, data, color){
+    // console.log(data);
+    ctx.fillStyle = color;
+    ctx.beginPath()
+    ctx.moveTo(data[0], data[1]);
+    for (var i = 2; i < data.length; i+=2){
+      ctx.lineTo(data[i], data[i+1]);
+    }
+    ctx.closePath();
+    ctx.fill();
+  },
+  segment: function(ctx, canvasWidth, lanes, segment){
+    let x1 = segment.nearPoint.screen.x,
+      y1 = segment.nearPoint.screen.y,
+      w1 = segment.nearPoint.screen.w,
+      x2 = segment.farPoint.screen.x,
+      y2 = segment.farPoint.screen.y,
+      w2 = segment.farPoint.screen.w;
+
+      // rumbleWidth:     function(projectedRoadWidth, lanes) { return projectedRoadWidth/Math.max(6,  2*lanes); },
+      // laneMarkerWidth: function(projectedRoadWidth, lanes) { return projectedRoadWidth/Math.max(32, 8*lanes); }
+
+    var r1 = w1/Math.max(6,  2*lanes),
+        r2 = w2/Math.max(6,  2*lanes);
+        // l1 = Render.laneMarkerWidth(w1, lanes),
+        // l2 = Render.laneMarkerWidth(w2, lanes),
+        // lanew1, lanew2, lanex1, lanex2, lane;
+
+    ctx.fillStyle = segment.color.grass;
+    ctx.fillRect(0, y2, canvasWidth, y1 - y2);
+    // console.log(lanes);
+    Render.fillPolygon(ctx, [x1-w1-r1, y1, x1-w1, y1, x2-w2, y2, x2-w2-r2, y2], segment.color.rumble); // rumble left
+    Render.fillPolygon(ctx, [x1+w1+r1, y1, x1+w1, y1, x2+w2, y2, x2+w2+r2, y2], segment.color.rumble); // rumble right
+    // ctx.fillStyle = segment.color.road;
+    Render.fillPolygon(ctx, [x1-w1,    y1, x1+w1, y1, x2+w2, y2, x2-w2,    y2], segment.color.road);//road
+    //
+    // if (color.lane) {
+    //   lanew1 = w1*2/lanes;
+    //   lanew2 = w2*2/lanes;
+    //   lanex1 = x1 - w1 + lanew1;
+    //   lanex2 = x2 - w2 + lanew2;
+    //   for(lane = 1 ; lane < lanes ; lanex1 += lanew1, lanex2 += lanew2, lane++)
+    //     Render.polygon(ctx, lanex1 - l1/2, y1, lanex1 + l1/2, y1, lanex2 + l2/2, y2, lanex2 - l2/2, y2, segment.color.lane);
+    // }
+  }
+};
 
 class RacingGame extends SimpleGame{
   init(){
@@ -19,7 +78,15 @@ class RacingGame extends SimpleGame{
     this.rumbleLength = 3; // number of segments per rumble strip
     this.drawDistance = this.segmentLength*this.rumbleLength*10; // number of segments to draw
 
+    // this.trackLength = 1000;
+    this.lanes         = 3;                            // number of lanes
 
+
+    this.cameraHeight  = 1000;                         // z height of camera
+    this.cameraDepth   = .8;                         // z distance camera is from screen (computed)
+    this.roadWidth = 2000;
+
+    this.car = {x:0, y:0, z:0};
     this.resetRoad();
   }
 
@@ -28,8 +95,8 @@ class RacingGame extends SimpleGame{
     for(var n = 0 ; n < this.drawDistance*2 ; n++) { // arbitrary road length
       this.segments.push({
          index: n,
-         p1: { world: { z:  n   *this.segmentLength }, camera: {}, screen: {} },
-         p2: { world: { z: (n+1)*this.segmentLength }, camera: {}, screen: {} },
+         nearPoint: { world: { z:  n   *this.segmentLength }, camera: {}, screen: {} },
+         farPoint: { world: { z: (n+1)*this.segmentLength }, camera: {}, screen: {} },
          color: Math.floor(n/this.rumbleLength)%2 ? this.COLORS.DARK : this.COLORS.LIGHT
       });
     }
@@ -40,8 +107,54 @@ class RacingGame extends SimpleGame{
     return this.segments[Math.floor(z/this.segmentLength) % this.segments.length];
   }
 
-  draw(ctx) {
+  update(dt) {
+    if (this.keyspressed['ArrowUp'] || this.keyspressed['KeyW']) {
+      this.car.z += 4096*dt;
+    }
+  }
 
+  draw(ctx) {
+    this.renderSegments(ctx);
+    ctx.fillStyle="black";
+    ctx.fillRect(0,0,this.width, 404);
+    // ctx.fillStyle = 'red';
+    // //778, 469, 740, 469, 728, 465, 764, 465
+    // ctx.fillRect(778, 469, 4, 4);
+    // ctx.fillRect(740, 469, 4, 4);
+    // ctx.fillRect(728, 465, 4, 4);
+    // ctx.fillRect(764, 465, 4, 4);
+    //
+    // ctx.fillStyle = 'black';
+    // var data = [778, 469, 740, 469, 728, 465, 764, 465];
+    // ctx.beginPath();
+    // ctx.moveTo(data[0], data[1]);
+    // ctx.lineTo(740, 469);
+    // ctx.lineTo(728, 465);
+    // ctx.lineTo(764, 465);
+    // ctx.fill();
+  }
+
+  renderSegments(ctx){
+    let baseSegment = this.findSegment(this.car.z);
+    let maxY = this.canvas.height;
+    var n, segment;
+    // for each segment...
+    for (n = 0; n < 400; n++){
+      segment = this.segments[(baseSegment.index + n) % this.segments.length];
+      Util.project(segment.nearPoint, (this.car.x * this.roadWidth), this.cameraHeight, Math.abs(this.car.z-((segment.index < baseSegment.index)?this.trackLength:0)), this.cameraDepth, this.width, this.height, this.roadWidth);
+      Util.project(segment.farPoint, (this.car.x * this.roadWidth), this.cameraHeight, Math.abs(this.car.z-((segment.index < baseSegment.index)?this.trackLength:0)), this.cameraDepth, this.width, this.height, this.roadWidth);
+
+
+      // behind, or clipped by already rendered segment
+      if ((segment.nearPoint.camera.z <= this.cameraDepth) || (segment.farPoint.screen.y >= maxY)) {
+        // console.log('too near or too far:', n);
+        continue;
+      }
+
+      Render.segment(ctx, this.width, this.lanes, segment);
+
+      maxY = segment.farPoint.screen.y;
+    }
   }
 }
 
